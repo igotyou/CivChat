@@ -1,52 +1,45 @@
 package com.untamedears.civchat;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.entity.Player;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class CivChat extends JavaPlugin implements Listener{
-ChatManager chat = new ChatManager();
-ChatListener cl= new ChatListener(chat);
-	public void onEnable(){
+public class CivChat extends JavaPlugin implements Listener {
+	private ChatManager chat = new ChatManager(getConfig());
+	private ChatListener cl = new ChatListener(chat);
+	private FileConfiguration config = getConfig();
+	
+	public void onEnable() {
 		registerEvents();
-	    initConfig();
-		Commands commands = new Commands();
-		for (String command : getDescription().getCommands().keySet()) {
-		getCommand(command).setExecutor(commands);
-		}
-	}
-	public void onDisable(){
+		this.saveDefaultConfig();
+		chat = new ChatManager(getConfig());
+		initConfig();
+		Commands commands=new Commands(chat);
 		
-	}
-	public void initConfig(){
-
-		double chatrange=500;
-		this.getConfig().set("chatrange",chatrange);
-		if (this.getConfig()==null){
-
-			this.saveConfig();
+		for (String command : getDescription().getCommands().keySet()) {
+			getCommand(command).setExecutor(commands);
 		}
+	}
+	
+	public void onDisable() {
+
+	}
+	
+	public void initConfig() {
+		if(!config.contains("chat.range"))
+			config.set("chat.range", 1000);
+	}
+
+	public void saveConfig() {
+		config.options().copyDefaults(true);
+	}
+	
+	public void reloadConfig() {
+		this.reloadConfig();
+	}
+
+	private void registerEvents() {
+		getServer().getPluginManager().registerEvents(cl, this);
 		return;
 	}
-	
-	public void saveConfig(){
-		this.getConfig().options().copyDefaults(true);
-	}
-	public void ReloadConfig(){
-	    this.reloadConfig();
-	}
-	
-	private void registerEvents() {
-	    getServer().getPluginManager().registerEvents(cl, this);
-	    return;
-	  }
-	
-	
-	
 }
