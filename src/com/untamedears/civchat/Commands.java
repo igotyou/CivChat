@@ -19,20 +19,21 @@ public class Commands implements CommandExecutor {
 			if (!(sender instanceof Player))
 			{
 				sender.sendMessage("You have to be a player to use that command!");
+				return false;
 			}
 			
 			Player player = (Player) sender;
 
 			if (args.length < 1) {
-				if (chatManager.getChannel(player.getName()) == null) {
-					player.sendMessage(ChatColor.RED + "Usage: /tell <player>");
+				if (chatManager.getChannel(player.getDisplayName()) == null) {
+					//player.sendMessage(ChatColor.RED + "Usage: /tell <player>");
+					return false;
 				}
 				else {
-					chatManager.removeChannel(player.getName());
+					chatManager.removeChannel(player.getDisplayName());
 					player.sendMessage(ChatColor.YELLOW + "You have moved to regular chat.");
+					return true;
 				}
-				
-				return true;
 			}
 			else if(args.length == 1) {
 				Player receiver = Bukkit.getPlayerExact(args[0]);
@@ -40,10 +41,10 @@ public class Commands implements CommandExecutor {
 				if (receiver == null) {
 					player.sendMessage(ChatColor.RED + "Error: Player is offline.");
 					
-					return true;
+					return false;
 				}
 				else {
-					chatManager.addChannel(player.getName(), receiver.getName());
+					chatManager.addChannel(player.getDisplayName(), receiver.getDisplayName());
 					player.sendMessage(ChatColor.YELLOW + "You are now chatting with "+ receiver.getDisplayName() + ".");
 					
 					return true;

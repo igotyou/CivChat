@@ -20,7 +20,7 @@ public class ChatManager {
 
 	public void sendPrivateMessage(Player from, Player to, String message) {
 		from.sendMessage(ChatColor.DARK_PURPLE + "To " + to.getDisplayName() + ": " + message);
-		to.sendMessage(ChatColor.DARK_PURPLE + "From " +from.getName() + ": " + message);
+		to.sendMessage(ChatColor.DARK_PURPLE + "From " +from.getDisplayName() + ": " + message);
 	}
 	
 	public void sendPlayerBroadcast(Player player, String message, Set<Player> receivers) {
@@ -63,11 +63,12 @@ public class ChatManager {
 			
 			if (chatrange <= chatmax) {
 				receiver.sendMessage(player.getDisplayName() + ": " + message);
+				if(!received && !receiver.getDisplayName().equals(player.getDisplayName())) {
+					received = true;
+				}
 			}
 			
-			if(!received && !receiver.getName().equals(player.getName())) {
-				received = true;
-			}
+
 			
 			if(!received)
 				player.sendMessage(ChatColor.YELLOW + "No one hears you.");
@@ -98,5 +99,11 @@ public class ChatManager {
 			channels.remove(player);
 		}
 	}
-
+	public boolean channelExists(String player) {
+		if (channels.containsKey(player))
+		{
+			return true;
+		}
+		return false;
+	}
 }

@@ -23,21 +23,21 @@ public class ChatListener implements Listener {
 		
 		String message = event.getMessage();
 		Player player = event.getPlayer();
-		String channel = chat.getChannel(player.getName());
 		
-		if(channel != null) {
-			Player to = Bukkit.getPlayerExact(channel);
+		if(chat.channelExists(player.getDisplayName())) {
+			Player to = Bukkit.getPlayerExact(chat.getChannel(player.getDisplayName()));
 			
 			if(to != null) {
 				chat.sendPrivateMessage(player, to, message);
-				return;
 			}
 			else {
-				chat.removeChannel(player.getName());
+				chat.removeChannel(player.getDisplayName());
 				player.sendMessage(ChatColor.GOLD + "The player you were chatting with has gone offline. You are now in regular chat.");
 			}
 		}
-		
-		chat.sendPlayerBroadcast(player, message, event.getRecipients());
+		else
+		{
+			chat.sendPlayerBroadcast(player, message, event.getRecipients());
+		}
 	}
 }
