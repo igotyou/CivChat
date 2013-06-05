@@ -7,60 +7,104 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Commands implements CommandExecutor{
-	Channel ch;
-	CivChat chat= new CivChat();
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args){
-		
-             
-		if (label.equalsIgnoreCase("tell") || label.equalsIgnoreCase("message")){
-			
-			if (args.length < 1) {
-                sender.sendMessage("Provide a player name");
-                return true;
-        }
-			if (args.length==1){
-				
+public class Commands implements CommandExecutor {
+	private CivChat civ;
+	private ChatManager chatManager;
+	
+	public Commands (ChatManager chatManagerInstance) {
+		chatManager = chatManagerInstance;
+	}
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (command.getName().equals("tell")) {
+			if (!(sender instanceof Player))
+			{
+				sender.sendMessage("You have to be a player to use that command!");
 			}
-			if (args.length>1){
-				Player playerreciever= Bukkit.getPlayerExact(args[0]);
+			
+			Player player = (Player) sender;
+
+			if (args.length < 1) {
+				if (chatManager.getChannel(player.getName()) == null) {
+					player.sendMessage(ChatColor.RED + "Usage: /tell <player>");
+				}
+				else {
+					chatManager.removeChannel(player.getName());
+					player.sendMessage(ChatColor.YELLOW + "You have moved to regular chat.");
+				}
 				
-				if (playerreciever==null){
-					sender.sendMessage("Player is offline");
+				return true;
+			}
+			else if(args.length == 1) {
+				Player receiver = Bukkit.getPlayerExact(args[0]);
+				
+				if (receiver == null) {
+					player.sendMessage(ChatColor.RED + "Error: Player is offline.");
+					
 					return true;
 				}
-				else{
-				StringBuilder argsmessage= new StringBuilder();
-				for (int i= 1;i<args.length;i++){
-					argsmessage.append(args[i]);
-					argsmessage.append(" ");
-				}
-				argsmessage.toString();
-			sender.sendMessage(ChatColor.RED+"To "+playerreciever.getDisplayName()+": "+ argsmessage);
-			playerreciever.sendMessage(ChatColor.RED+"From "+sender.getName()+": "+ argsmessage);
-			ch.setChannel(sender.getName(), playerreciever.getName(), true);
-			return true;
+				else {
+					chatManager.addChannel(player.getName(), receiver.getName());
+					player.sendMessage(ChatColor.YELLOW + "You are now chatting with "+ receiver.getDisplayName() + ".");
+					
+					return true;
 				}
 			}
+
+			if (args.length > 1) {
+				Player receiver = Bukkit.getPlayerExact(args[0]);
+
+				if (receiver == null) {
+					sender.sendMessage(ChatColor.RED + "Error: Player is offline.");
+					
+					return true;
+				}
+				
+				else {
+					StringBuilder message = new StringBuilder();
+					
+					for (int i = 1; i < args.length; i++) {
+						message.append(args[i]);
+						
+						if(i < args.length - 1)
+							message.append(" ");
+					}
+
+					chatManager.sendPrivateMessage(player, receiver, message.toString());
+
+					return true;
+				}
+			}
+			
 			return true;
 		}
-		if (label.equalsIgnoreCase("civchat")){
-			if (args[0]=="save"){
-				sender.sendMessage("saved config");
-				chat.saveConfig();
+		
+		if (command.getName().equals("civchat")) {
+			if(!sender.hasPermission("civchat.admin")) {
+				sender.sendMessage(ChatColor.RED + "You do not have permission to do this.");
 				return true;
 			}
-			if (args[0]=="reload"){
-				sender.sendMessage("reloaded config");
-				chat.ReloadConfig();
+			
+			if (args[0].equals("save")) {
+				sender.sendMessage(ChatColor.GREEN + "Saved configuration.");
+				civ.saveConfig();
+				
 				return true;
 			}
-			else{ sender.sendMessage("Incorrect arg");}
+			if (args[0].equals("reload")) {
+				sender.sendMessage(ChatColor.GREEN + "Reloaded configuration.");
+				civ.reloadConfig();
+				
+				return true;
+			}
+			
+			sender.sendMessage(ChatColor.RED + "Usage: /civchat <save/reload>");
+			
 			return true;
 		}
+		
 		return true;
 	}
-	
+
 }
 
 
